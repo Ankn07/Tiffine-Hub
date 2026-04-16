@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Zone Server — API Docs</title>
+<script src="docs.js" defer></script>
+<style>
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;
+    --accent:#6c63ff;--accent2:#00d2a0;--warn:#f5a623;--delete:#ff5c5c;
+    --text:#e8eaf6;--muted:#7b82a6;
+    --get:#00d2a0;--post:#6c63ff;--put:#f5a623;--patch:#3db9f5;
+    --radius:8px;--font:system-ui,sans-serif;--mono:'Fira Code',monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}
+  .layout{display:flex;min-height:100vh}
+
+  /* Sidebar */
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+  .sidebar::-webkit-scrollbar{width:4px}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .sidebar-logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:16px}
+  .sidebar-logo h2{font-size:15px;font-weight:700}
+  .sidebar-logo p{font-size:11px;color:var(--muted);margin-top:2px}
+  .sidebar-section{padding:8px 20px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .sidebar-item{display:flex;align-items:center;gap:10px;padding:7px 20px;text-decoration:none;color:var(--muted);font-size:13px;transition:all .15s}
+  .sidebar-item:hover,.sidebar-item.active{color:var(--text);background:var(--surface2)}
+
+  /* Main */
+  .main{margin-left:260px;flex:1;padding:40px 48px;max-width:1100px}
+
+  /* Page header */
+  .page-header{margin-bottom:40px;padding-bottom:32px;border-bottom:1px solid var(--border)}
+  .page-header h1{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .page-header p{color:var(--muted);margin-top:8px;font-size:14px}
+  .meta-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);color:var(--muted)}
+  .chip span{color:var(--text)}
+
+  /* Base URL */
+  .base-url-bar{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:32px;font-family:var(--mono);font-size:13px}
+  .base-url-bar .label{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;flex-shrink:0}
+  .base-url-bar .url{color:var(--accent2)}
+
+  /* Module */
+  .module{margin-bottom:56px;scroll-margin-top:24px}
+  .module-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .module-header h2{font-size:18px;font-weight:700}
+
+  /* Auth card */
+  .auth-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:32px;scroll-margin-top:24px}
+  .auth-card h3{font-size:14px;font-weight:700;margin-bottom:10px}
+  .auth-code{font-family:var(--mono);font-size:12px;color:var(--accent2);background:var(--bg);padding:10px 14px;border-radius:var(--radius);margin-top:8px;border:1px solid var(--border)}
+
+  /* Endpoint */
+  .endpoint{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+  .endpoint-header{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;background:var(--surface);user-select:none;transition:background .15s}
+  .endpoint-header:hover{background:var(--surface2)}
+  .method{font-family:var(--mono);font-size:11px;font-weight:800;padding:3px 8px;border-radius:4px;flex-shrink:0;min-width:58px;text-align:center}
+  .method-GET   {background:rgba(0,210,160,.15);color:var(--get);border:1px solid rgba(0,210,160,.3)}
+  .method-POST  {background:rgba(108,99,255,.15);color:var(--post);border:1px solid rgba(108,99,255,.3)}
+  .method-PUT   {background:rgba(245,166,35,.15);color:var(--put);border:1px solid rgba(245,166,35,.3)}
+  .method-PATCH {background:rgba(61,185,245,.15);color:var(--patch);border:1px solid rgba(61,185,245,.3)}
+  .method-DELETE{background:rgba(255,92,92,.15);color:var(--delete);border:1px solid rgba(255,92,92,.3)}
+  .endpoint-path{font-family:var(--mono);font-size:13px;color:var(--text);flex:1}
+  .endpoint-path .param{color:var(--warn)}
+  .endpoint-desc{font-size:12px;color:var(--muted);margin-left:auto;text-align:right;max-width:240px}
+  .chevron{color:var(--muted);font-size:12px;transition:transform .2s;margin-left:8px}
+  .endpoint.open .chevron{transform:rotate(180deg)}
+  .lock-icon{color:var(--warn);font-size:12px;flex-shrink:0}
+  .endpoint-body{display:none;border-top:1px solid var(--border);background:var(--bg);padding:20px 22px}
+  .endpoint.open .endpoint-body{display:block}
+
+  /* Tabs */
+  .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+  .tab{padding:8px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  /* Table */
+  .params-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+  .params-table th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+  .params-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  .params-table tr:last-child td{border-bottom:none}
+  .param-name{font-family:var(--mono);color:var(--accent2)}
+  .param-type{color:var(--accent)}
+  .required-badge{font-size:9px;background:rgba(255,92,92,.2);color:var(--delete);padding:1px 5px;border-radius:3px;font-weight:700;margin-left:4px}
+  .optional-badge{font-size:9px;background:rgba(123,130,166,.15);color:var(--muted);padding:1px 5px;border-radius:3px;font-weight:700;margin-left:4px}
+
+  /* Code */
+  .code-block{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:var(--mono);font-size:12px;line-height:1.7;overflow-x:auto;white-space:pre;color:var(--text)}
+  .copy-btn{position:absolute;top:10px;right:10px;background:var(--border);border:none;color:var(--muted);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s}
+  .copy-btn:hover{background:var(--accent);color:#fff}
+  .jk{color:#a9d1f7}.js{color:#c3e88d}.jn{color:#f78c6c}.jb{color:#ff5874}.jnu{color:var(--muted)}
+
+  /* Notes */
+  .note{background:rgba(108,99,255,.08);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;font-size:12px;color:var(--muted);margin-top:12px}
+  .note strong{color:var(--text)}
+  .soft-delete-note{background:rgba(255,92,92,.07);border:1px solid rgba(255,92,92,.2);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--muted);margin-top:10px}
+  .soft-delete-note strong{color:var(--delete)}
+
+  /* Status chips */
+  .status-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .status-chip{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px}
+  .s2xx{background:rgba(0,210,160,.15);color:var(--get)}
+  .s4xx{background:rgba(245,166,35,.15);color:var(--warn)}
+  .s5xx{background:rgba(255,92,92,.15);color:var(--delete)}
+
+  /* Playground */
+  .playground{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:16px}
+  .playground h4{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+  .pg-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  .pg-label{font-size:11px;color:var(--muted);min-width:80px}
+  .pg-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px 10px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;min-width:0}
+  .pg-input:focus{border-color:var(--accent)}
+  .pg-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;resize:vertical;min-height:100px}
+  .pg-textarea:focus{border-color:var(--accent)}
+  .send-btn{background:var(--accent);border:none;color:#fff;padding:8px 18px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s}
+  .send-btn:hover{opacity:.85}
+  .send-btn:disabled{opacity:.4;cursor:not-allowed}
+  .pg-response{margin-top:12px;display:none}
+  .pg-response-header{display:flex;gap:10px;align-items:center;margin-bottom:8px;font-size:11px}
+  .pg-status{font-family:var(--mono);font-weight:700;padding:2px 8px;border-radius:4px}
+  .pg-time{color:var(--muted)}
+
+  @media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo"><h2>⚡ Zone Server</h2><p>API Reference v1.0.0</p></div>
+  <div class="sidebar-section">Overview</div>
+  <a class="sidebar-item" href="#overview">📋 Introduction</a>
+  <a class="sidebar-item" href="#auth">🔐 Authentication</a>
+  <a class="sidebar-item" href="#responses">📦 Response Format</a>
+  <a class="sidebar-item" href="#errors">⚠️ Error Codes</a>
+  <div class="sidebar-section">Modules</div>
+  <a class="sidebar-item" href="#administrators">👤 Administrator</a>
+  <a class="sidebar-item" href="#operators">🏢 Operator</a>
+  <a class="sidebar-item" href="#authorized-person">👥 Authorized Person</a>
+  <a class="sidebar-item" href="#zones">🗺️ Zone</a>
+  <a class="sidebar-item" href="#store-categories">🏷️ Store Category</a>
+  <a class="sidebar-item" href="#stores">🏪 Store</a>
+  <a class="sidebar-item" href="#store-users">👨‍💼 Store User</a>
+  <a class="sidebar-item" href="#product-categories">📂 Product Category</a>
+  <a class="sidebar-item" href="#products">📦 Product</a>
+  <a class="sidebar-item" href="#product-variants">🔀 Product Variant</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- OVERVIEW -->
+  <div class="page-header" id="overview">
+    <h1>Zone Server API</h1>
+    <p>Zone-based multi-vendor commerce backend — Express.js + MongoDB + Vercel.</p>
+    <div class="meta-chips">
+      <div class="chip">Version <span>1.0.0</span></div>
+      <div class="chip">Base <span>/api/v1</span></div>
+      <div class="chip">Auth <span>Bearer JWT</span></div>
+      <div class="chip">Format <span>JSON</span></div>
+    </div>
+  </div>
+  <div class="base-url-bar"><span class="label">Base URL</span><span class="url">https://your-project.vercel.app/api/v1</span></div>
+
+  <!-- AUTH -->
+  <div class="auth-card" id="auth">
+    <h3>🔐 Authentication</h3>
+    <p style="font-size:13px;color:var(--muted)">Protected routes require a Bearer token in the Authorization header.</p>
+    <div class="auth-code">Authorization: Bearer &lt;your_jwt_token&gt;</div>
+    <div class="note" style="margin-top:12px"><strong>🔓 Public:</strong> GET stores, store detail, stores by pin code, OTP login, OTP verify.</div>
+  </div>
+
+  <!-- RESPONSE FORMAT -->
+  <div class="module" id="responses">
+    <div class="module-header"><h2>📦 Response Format</h2></div>
+    <p style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Success</p>
+    <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"message"</span>: <span class="js">"OK"</span>, <span class="jk">"data"</span>: {}, <span class="jk">"meta"</span>: {} }</div>
+    <p style="font-size:11px;font-weight:700;color:var(--muted);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px">Error</p>
+    <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">false</span>, <span class="jk">"message"</span>: <span class="js">"Request failed"</span>, <span class="jk">"error"</span>: { <span class="jk">"reason"</span>: <span class="js">"NOT_FOUND"</span>, <span class="jk">"message"</span>: <span class="js">"No record found"</span> } }</div>
+    <p style="font-size:11px;font-weight:700;color:var(--muted);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px">Pagination Meta</p>
+    <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"meta"</span>: { <span class="jk">"page"</span>: <span class="jn">1</span>, <span class="jk">"limit"</span>: <span class="jn">10</span>, <span class="jk">"total"</span>: <span class="jn">250</span>, <span class="jk">"total_pages"</span>: <span class="jn">25</span> } }</div>
+  </div>
+
+  <!-- ERRORS -->
+  <div class="module" id="errors">
+    <div class="module-header"><h2>⚠️ Error Codes</h2></div>
+    <table class="params-table">
+      <tr><th>HTTP</th><th>Reason</th><th>Description</th></tr>
+      <tr><td class="param-type">400</td><td class="param-name">VALIDATION_ERROR</td><td style="color:var(--muted)">Body or query params failed Zod validation</td></tr>
+      <tr><td class="param-type">401</td><td class="param-name">INVALID_CREDENTIALS</td><td style="color:var(--muted)">Wrong username or password</td></tr>
+      <tr><td class="param-type">401</td><td class="param-name">INVALID_TOKEN</td><td style="color:var(--muted)">JWT missing, invalid, or expired</td></tr>
+      <tr><td class="param-type">401</td><td class="param-name">INVALID_OTP</td><td style="color:var(--muted)">OTP does not match or has expired</td></tr>
+      <tr><td class="param-type">404</td><td class="param-name">NOT_FOUND</td><td style="color:var(--muted)">Resource does not exist or is soft-deleted</td></tr>
+      <tr><td class="param-type">409</td><td class="param-name">DUPLICATE_ENTRY</td><td style="color:var(--muted)">Unique constraint violation (email, SKU, username)</td></tr>
+      <tr><td class="param-type">500</td><td class="param-name">INTERNAL_ERROR</td><td style="color:var(--muted)">Unexpected server error</td></tr>
+    </table>
+  </div>
+
+  <!-- ADMINISTRATOR -->
+  <div class="module" id="administrators">
+    <div class="module-header"><h2>👤 Administrator</h2></div>
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/administrators</span><span class="endpoint-desc">Login — get JWT token</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs">
+          <div class="tab active" data-target="t-adm-body">Body</div>
+          <div class="tab" data-target="t-adm-resp">Response</div>
+          <div class="tab" data-target="t-adm-try">Try It</div>
+        </div>
+        <div class="tab-content active" id="t-adm-body">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th>Rules</th></tr><tr><td class="param-name">username<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">min 3 chars</td></tr><tr><td class="param-name">password<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">min 6 chars</td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"username"</span>: <span class="js">"admin_root"</span>, <span class="jk">"password"</span>: <span class="js">"SecurePass@123"</span> }</div>
+        </div>
+        <div class="tab-content" id="t-adm-resp">
+          <div class="status-row"><span class="status-chip s2xx">200 OK</span><span class="status-chip s4xx">401 Unauthorized</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{
+  <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"message"</span>: <span class="js">"Login successful"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"token"</span>: <span class="js">"eyJhbGci..."</span>,
+    <span class="jk">"administrator"</span>: { <span class="jk">"_id"</span>: <span class="js">"664a..."</span>, <span class="jk">"username"</span>: <span class="js">"admin_root"</span>, <span class="jk">"created_at"</span>: <span class="js">"2024-05-10T08:00:00.000Z"</span> }
+  }, <span class="jk">"meta"</span>: {}
+}</div>
+        </div>
+        <div class="tab-content" id="t-adm-try">
+          <div class="playground">
+            <h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" placeholder="https://your-project.vercel.app" /></div>
+            <div class="pg-row"><span class="pg-label">Body</span></div>
+            <textarea class="pg-textarea">{"username":"admin_root","password":"SecurePass@123"}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/administrators" data-auth="false">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPERATORS -->
+  <div class="module" id="operators">
+    <div class="module-header"><h2>🏢 Operator</h2></div>
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/operators</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create operator</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="t-opc-body">Body</div><div class="tab" data-target="t-opc-resp">Response</div><div class="tab" data-target="t-opc-try">Try It</div></div>
+        <div class="tab-content active" id="t-opc-body">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th>Rules</th></tr><tr><td class="param-name">name<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">min 3</td></tr><tr><td class="param-name">email<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">valid email, unique</td></tr><tr><td class="param-name">phone_number<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">10–15 chars</td></tr><tr><td class="param-name">business_type<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">min 2</td></tr><tr><td class="param-name">upi_id<span class="optional-badge">optional</span></td><td class="param-type">string</td><td style="color:var(--muted)">—</td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Rajesh Kumar"</span>, <span class="jk">"email"</span>: <span class="js">"rajesh@example.com"</span>, <span class="jk">"phone_number"</span>: <span class="js">"9876543210"</span>, <span class="jk">"business_type"</span>: <span class="js">"Retail"</span> }</div>
+        </div>
+        <div class="tab-content" id="t-opc-resp">
+          <div class="status-row"><span class="status-chip s2xx">201 Created</span><span class="status-chip s4xx">409 Conflict</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"data"</span>: { <span class="jk">"_id"</span>: <span class="js">"663f..."</span>, <span class="jk">"name"</span>: <span class="js">"Rajesh Kumar"</span>, <span class="jk">"is_active"</span>: <span class="jb">true</span>, <span class="jk">"created_at"</span>: <span class="js">"2024-05-12T09:15:00.000Z"</span> } }</div>
+        </div>
+        <div class="tab-content" id="t-opc-try">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" placeholder="https://your-project.vercel.app" /></div>
+            <div class="pg-row"><span class="pg-label">Token</span><input class="pg-input token-input" placeholder="eyJ..." /></div>
+            <div class="pg-row"><span class="pg-label">Body</span></div>
+            <textarea class="pg-textarea">{"name":"Rajesh Kumar","email":"rajesh@example.com","phone_number":"9876543210","business_type":"Retail"}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/operators" data-auth="true">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/operators</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query params:</strong> page, limit, search (name/email), status (true/false)</div><div class="code-block" style="margin-top:12px"><button class="copy-btn">Copy</button>{ <span class="jk">"data"</span>: [{...}], <span class="jk">"meta"</span>: { <span class="jk">"page"</span>: <span class="jn">1</span>, <span class="jk">"total"</span>: <span class="jn">42</span>, <span class="jk">"total_pages"</span>: <span class="jn">5</span> } }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/operators/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Returns full operator. 404 if not found or soft-deleted.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/operators/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Toggle active</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"is_active"</span>: <span class="jb">false</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/operators/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Assign zone &amp; person</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"authorized_person_id"</span>: <span class="js">"664c..."</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/operators/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete:</strong> Sets is_deleted=true and deleted_at. Permanently purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- AUTHORIZED PERSON -->
+  <div class="module" id="authorized-person">
+    <div class="module-header"><h2>👥 Authorized Person</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/authorize-person/login</span><span class="endpoint-desc">Request OTP via email</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"email"</span>: <span class="js">"priya@example.com"</span> }</div><div class="note"><strong>Dev:</strong> _dev_otp in response when MAIL_SERVICE_URL not set. Wire mail service for production.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/authorize-person/verify-otp</span><span class="endpoint-desc">Verify OTP → JWT</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"email"</span>: <span class="js">"priya@example.com"</span>, <span class="jk">"otp"</span>: <span class="js">"493821"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/authorized-person</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Priya Sharma"</span>, <span class="jk">"phone_number"</span>: <span class="js">"9123456780"</span>, <span class="jk">"email"</span>: <span class="js">"priya@example.com"</span>, <span class="jk">"operator_id"</span>: <span class="js">"663f..."</span>, <span class="jk">"role"</span>: <span class="js">"MANAGER"</span> }</div><div class="note"><strong>Roles:</strong> MANAGER | STAFF | SUPPORT | DELIVERY</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/authorized-person</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, operator_id, role</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/authorized-person/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Single authorized person.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/authorized-person/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"role"</span>: <span class="js">"STAFF"</span>, <span class="jk">"phone_number"</span>: <span class="js">"9123456799"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/authorized-person/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/authorized-person/operators/<span class="param">:operatorId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By operator</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Path:</strong> operatorId — MongoDB ObjectId of the operator</div></div></div>
+  </div>
+
+  <!-- ZONE -->
+  <div class="module" id="zones">
+    <div class="module-header"><h2>🗺️ Zone</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/zones</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create zone</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"area"</span>: <span class="js">"South Kolkata"</span>, <span class="jk">"zone_name"</span>: <span class="js">"Zone-SK-01"</span>, <span class="jk">"latitude"</span>: <span class="jn">22.5355</span>, <span class="jk">"longitude"</span>: <span class="jn">88.3476</span>, <span class="jk">"operator_id"</span>: <span class="js">"663f..."</span>, <span class="jk">"zone"</span>: [{ <span class="jk">"post_office"</span>: <span class="js">"Jadavpur"</span>, <span class="jk">"pin_code"</span>: <span class="jn">700032</span> }] }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/zones</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, operator_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/zones/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Full zone with all pin code entries.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/zones/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_name"</span>: <span class="js">"Zone-SK-01-A"</span>, <span class="jk">"area"</span>: <span class="js">"Updated Area"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/zones/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/zones/add-pin-code</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Add pin code</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"post_office"</span>: <span class="js">"Garia"</span>, <span class="jk">"pin_code"</span>: <span class="jn">700084</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/zones/remove-pin-code</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Remove pin code</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"pin_code"</span>: <span class="jn">700032</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/zones/add-bulk-pin-code</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Add bulk pin codes</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"zone"</span>: [{ <span class="jk">"post_office"</span>: <span class="js">"Baruipur"</span>, <span class="jk">"pin_code"</span>: <span class="jn">700144</span> }] }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/zones/remove-bulk-pin-code</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Remove bulk pin codes</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"pin_codes"</span>: [<span class="jn">700032</span>, <span class="jn">700033</span>] }</div></div></div>
+  </div>
+
+  <!-- STORE CATEGORIES -->
+  <div class="module" id="store-categories">
+    <div class="module-header"><h2>🏷️ Store Category</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/store-categories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Restaurant"</span> }</div><div class="note">Slug is auto-generated from name.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-categories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Single store category.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/store-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Food &amp; Beverages"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/store-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- STORES -->
+  <div class="module" id="stores">
+    <div class="module-header"><h2>🏪 Store</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/stores</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create store</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Spice Garden"</span>, <span class="jk">"phone_number"</span>: <span class="js">"9000011112"</span>, <span class="jk">"pin_code"</span>: <span class="jn">700032</span>, <span class="jk">"latitude"</span>: <span class="jn">22.499</span>, <span class="jk">"longitude"</span>: <span class="jn">88.372</span>, <span class="jk">"address"</span>: <span class="js">"12 Lake Rd"</span>, <span class="jk">"category_id"</span>: <span class="js">"664d..."</span>, <span class="jk">"is_doordrop"</span>: <span class="jb">true</span>, <span class="jk">"working_hours"</span>: [{ <span class="jk">"day"</span>: <span class="js">"Monday"</span>, <span class="jk">"open_time"</span>: <span class="js">"09:00"</span>, <span class="jk">"close_time"</span>: <span class="js">"22:00"</span> }] }</div><div class="note"><strong>Status:</strong> ACTIVE | INACTIVE | BLOCKED (default ACTIVE). Slug auto-generated.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/stores</span><span class="endpoint-desc">List all (public)</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, status, category_id, pin_code</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/stores/<span class="param">:id</span></span><span class="endpoint-desc">Get by ID (public)</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Full store with working_hours array.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/stores/pin-code/<span class="param">:pin-code</span></span><span class="endpoint-desc">By pin code (public)</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">Returns all ACTIVE stores in that pin code. Example: /api/v1/stores/pin-code/700032</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/stores/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">All fields optional. Slug regenerated if name changes.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/stores/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update status</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"status"</span>: <span class="js">"BLOCKED"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/stores/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- STORE USERS -->
+  <div class="module" id="store-users">
+    <div class="module-header"><h2>👨‍💼 Store User</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/store-users</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create &amp; assign</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"first_name"</span>: <span class="js">"Amit"</span>, <span class="jk">"phone"</span>: <span class="js">"9012345678"</span>, <span class="jk">"role"</span>: <span class="js">"STORE_MANAGER"</span>, <span class="jk">"username"</span>: <span class="js">"amit_sg"</span>, <span class="jk">"password"</span>: <span class="js">"Pass@123"</span>, <span class="jk">"store_id"</span>: <span class="js">"664e..."</span> }</div><div class="note"><strong>Roles:</strong> STORE_MANAGER | POS — password bcrypt-hashed, never returned</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-users</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search (name/email/username/phone), store_id, role, status</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Password never returned.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:storeId</span>/store-users</span><span class="lock-icon">🔒</span><span class="endpoint-desc">All users of a store</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Path:</strong> storeId — MongoDB ObjectId</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"first_name"</span>: <span class="js">"Amit"</span>, <span class="jk">"role"</span>: <span class="js">"POS"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Publish/unpublish</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"is_published"</span>: <span class="jb">false</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- PRODUCT CATEGORIES -->
+  <div class="module" id="product-categories">
+    <div class="module-header"><h2>📂 Product Category</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/product-categories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Starters"</span>, <span class="jk">"store_id"</span>: <span class="js">"664e..."</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-categories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, store_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Single product category.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/product-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Appetizers"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/product-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="module" id="products">
+    <div class="module-header"><h2>📦 Product</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/products</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create product</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Paneer Tikka"</span>, <span class="jk">"type"</span>: <span class="js">"SIMPLE"</span>, <span class="jk">"sku"</span>: <span class="js">"SG-STR-001"</span>, <span class="jk">"stock"</span>: <span class="jn">50</span>, <span class="jk">"store_id"</span>: <span class="js">"664e..."</span>, <span class="jk">"category_id"</span>: <span class="js">"665g..."</span>, <span class="jk">"regular_price"</span>: <span class="jn">280</span>, <span class="jk">"price"</span>: <span class="jn">250</span>, <span class="jk">"tax_class"</span>: <span class="js">"GST18"</span>, <span class="jk">"tax_status"</span>: <span class="js">"TAXABLE"</span> }</div><div class="note"><strong>type:</strong> SIMPLE | VARIANT &nbsp;·&nbsp; <strong>tax_class:</strong> STANDARD | GST12 | GST15 | GST18</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/products</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search (full-text), store_id, category_id, type, tax_status</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/products/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Full product including images and tags.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/products/stores/<span class="param">:storesId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By store</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, category_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/products/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">All fields optional. Use PATCH /stock for stock-only updates.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/products/<span class="param">:id</span>/stock</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update stock</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"stock"</span>: <span class="jn">75</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/products/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- PRODUCT VARIANTS -->
+  <div class="module" id="product-variants">
+    <div class="module-header"><h2>🔀 Product Variant</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/product-variants</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create variant</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"product_id"</span>: <span class="js">"666h..."</span>, <span class="jk">"variant_name"</span>: <span class="js">"500ml"</span>, <span class="jk">"sku"</span>: <span class="js">"SG-DRK-001-500"</span>, <span class="jk">"price"</span>: <span class="jn">80</span>, <span class="jk">"stock"</span>: <span class="jn">100</span> }</div><div class="note">Only VARIANT-type products should have variants. SKU must be globally unique.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-variants</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, product_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-variants/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Single product variant.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-variants/products/<span class="param">:productsid</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By product</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">All variants for a parent product. Useful for product detail pages.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/product-variants/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"variant_name"</span>: <span class="js">"750ml"</span>, <span class="jk">"price"</span>: <span class="jn">110</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/product-variants/<span class="param">:id</span>/stock</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update stock</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"stock"</span>: <span class="jn">200</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/product-variants/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>

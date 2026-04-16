@@ -1,0 +1,61 @@
+// src/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AddressType {
+  HOME
+  WORK
+  OTHER
+}
+
+model Customer {
+  id                String             @id @default(cuid())
+  first_name        String
+  last_name         String?
+  phone             String             @unique
+  email             String             @unique
+  password          String
+  profile_image_url String?
+  is_verified       Boolean            @default(false)
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+
+  addresses         Customer_Address[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([created_at])
+}
+
+model Customer_Address {
+  id              String      @id @default(cuid())
+  customer_id     String
+  full_name       String
+  phone           String
+  address_line_1  String
+  address_line_2  String?
+  landmark        String?
+  city            String
+  state           String
+  country         String
+  pin_code        Int
+  latitude        Float?
+  longitude       Float?
+  address_type    AddressType @default(HOME)
+  is_default      Boolean     @default(false)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  customer        Customer    @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+
+  @@index([customer_id])
+  @@index([is_default])
+  @@index([address_type])
+}

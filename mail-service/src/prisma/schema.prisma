@@ -1,0 +1,176 @@
+// src/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum ChangeType {
+  IN
+  OUT
+  ADJUST
+}
+
+enum TemplateType {
+  ORDER
+  PAYMENT
+  DELIVERY
+  OTP
+  PASSWORD_RESET
+  WELCOME
+  PROMOTION
+}
+
+enum RelatedEntityType {
+  ORDER
+  PAYMENT
+  DELIVERY
+  CUSTOMER
+  STORE
+  COUPON
+}
+
+enum QueueStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  COMPLAINED
+  FAILED
+}
+
+enum OtpPurpose {
+  ADMIN_LOGIN
+  AUTHORIZED_PERSON_LOGIN
+  PASSWORD_RESET
+}
+
+enum OtpStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+  FAILED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model Inventory_Log {
+  id           String     @id @default(cuid())
+  product_id   String
+  variant_id   String?
+  change_type  ChangeType
+  quantity     Int
+  reason       String?
+  reference_id String?
+  created_at   DateTime   @default(now())
+
+  @@index([product_id])
+  @@index([variant_id])
+  @@index([change_type])
+  @@index([created_at])
+}
+
+model Mail_Template {
+  id            String       @id @default(cuid())
+  name          String
+  slug          String       @unique
+  subject       String
+  html_body     String
+  text_body     String?
+  template_type TemplateType
+  is_active     Boolean      @default(true)
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+
+  queues Mail_Queue[]
+
+  @@index([slug])
+  @@index([template_type])
+  @@index([is_active])
+}
+
+model Mail_Queue {
+  id                  String            @id @default(cuid())
+  template_id         String
+  related_entity_type RelatedEntityType?
+  related_entity_id   String?
+  recipient_email     String
+  recipient_name      String?
+  subject             String
+  payload             Json?
+  status              QueueStatus       @default(PENDING)
+  scheduled_at        DateTime          @default(now())
+  sent_at             DateTime?
+  failed_at           DateTime?
+  failure_reason      String?
+  retry_count         Int               @default(0)
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
+
+  template Mail_Template @relation(fields: [template_id], references: [id])
+  logs     Mail_Log[]
+
+  @@index([status])
+  @@index([scheduled_at])
+  @@index([recipient_email])
+  @@index([template_id])
+  @@index([related_entity_type, related_entity_id])
+}
+
+model Mail_Log {
+  id                  String         @id @default(cuid())
+  queue_id            String
+  template_id         String
+  related_entity_type RelatedEntityType?
+  related_entity_id   String?
+  recipient_email     String
+  subject             String
+  provider            String?
+  provider_message_id String?
+  delivery_status     DeliveryStatus
+  opened_at           DateTime?
+  clicked_at          DateTime?
+  bounced_at          DateTime?
+  complained_at       DateTime?
+  sent_at             DateTime?
+  created_at          DateTime       @default(now())
+
+  queue Mail_Queue @relation(fields: [queue_id], references: [id])
+
+  @@index([queue_id])
+  @@index([template_id])
+  @@index([recipient_email])
+  @@index([delivery_status])
+  @@index([related_entity_type, related_entity_id])
+}
+
+model OTP {
+  id          String     @id @default(cuid())
+  email       String
+  otp_code    String
+  purpose     OtpPurpose
+  expires_at  DateTime
+  verified_at DateTime?
+  status      OtpStatus  @default(PENDING)
+  created_at  DateTime   @default(now())
+
+  @@index([email])
+  @@index([status])
+  @@index([purpose])
+  @@index([expires_at])
+}

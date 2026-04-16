@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>API Gateway — Unified Docs</title>
+<script src="docs.js" defer></script>
+<style>
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;
+  --accent:#6c63ff;--accent2:#00d2a0;--warn:#f5a623;--delete:#ff5c5c;
+  --text:#e8eaf6;--muted:#7b82a6;
+  --get:#00d2a0;--post:#6c63ff;--put:#f5a623;--patch:#3db9f5;--del:#ff5c5c;
+  --radius:8px;--font:system-ui,sans-serif;--mono:'Fira Code',monospace;
+  --gw:#a78bfa;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:268px;min-width:268px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sidebar-logo{padding:0 20px 18px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.sidebar-logo h2{font-size:14px;font-weight:800;background:linear-gradient(135deg,var(--gw),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sidebar-logo p{font-size:11px;color:var(--muted);margin-top:3px}
+.sidebar-section{padding:8px 20px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:6px 20px;text-decoration:none;color:var(--muted);font-size:12px;transition:all .15s}
+.sidebar-item:hover,.sidebar-item.active{color:var(--text);background:var(--surface2)}
+.svc-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:auto}
+.badge-auth{background:rgba(0,210,160,.15);color:var(--accent2)}
+.badge-mail{background:rgba(108,99,255,.2);color:#a78bfa}
+.badge-zone{background:rgba(245,166,35,.15);color:var(--warn)}
+.search-wrap{padding:0 16px 14px}
+.search-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:7px 10px;color:var(--text);font-size:12px;outline:none}
+.search-input:focus{border-color:var(--accent)}
+.main{margin-left:268px;flex:1;padding:40px 48px;max-width:1120px}
+.svc-bar{display:flex;gap:8px;margin-bottom:32px;flex-wrap:wrap}
+.svc-tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:none;color:var(--muted);transition:all .2s}
+.svc-tab:hover{border-color:var(--accent);color:var(--text)}
+.svc-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.page-header{margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.page-header h1{font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--gw),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-header p{color:var(--muted);margin-top:8px;font-size:13px}
+.meta-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);color:var(--muted)}
+.chip span{color:var(--text)}
+.base-url-bar{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:28px;font-family:var(--mono);font-size:13px;flex-wrap:wrap}
+.base-url-bar .label{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;flex-shrink:0}
+.base-url-bar input{background:transparent;border:none;outline:none;color:var(--accent2);font-family:var(--mono);font-size:13px;flex:1;min-width:220px}
+.module{margin-bottom:56px;scroll-margin-top:24px}
+.module-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.module-header h2{font-size:18px;font-weight:700}
+.svc-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:4px}
+.tag-auth{background:rgba(0,210,160,.12);color:var(--accent2);border:1px solid rgba(0,210,160,.25)}
+.tag-mail{background:rgba(167,139,250,.12);color:var(--gw);border:1px solid rgba(167,139,250,.25)}
+.tag-zone{background:rgba(245,166,35,.12);color:var(--warn);border:1px solid rgba(245,166,35,.25)}
+.auth-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:28px;scroll-margin-top:24px}
+.auth-card h3{font-size:14px;font-weight:700;margin-bottom:10px}
+.auth-code{font-family:var(--mono);font-size:12px;color:var(--accent2);background:var(--bg);padding:10px 14px;border-radius:var(--radius);margin-top:8px;border:1px solid var(--border)}
+.endpoint{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.endpoint-header{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;background:var(--surface);user-select:none;transition:background .15s}
+.endpoint-header:hover{background:var(--surface2)}
+.method{font-family:var(--mono);font-size:11px;font-weight:800;padding:3px 8px;border-radius:4px;flex-shrink:0;min-width:58px;text-align:center}
+.method-GET   {background:rgba(0,210,160,.15);color:var(--get);border:1px solid rgba(0,210,160,.3)}
+.method-POST  {background:rgba(108,99,255,.15);color:var(--post);border:1px solid rgba(108,99,255,.3)}
+.method-PUT   {background:rgba(245,166,35,.15);color:var(--put);border:1px solid rgba(245,166,35,.3)}
+.method-PATCH {background:rgba(61,185,245,.15);color:var(--patch);border:1px solid rgba(61,185,245,.3)}
+.method-DELETE{background:rgba(255,92,92,.15);color:var(--del);border:1px solid rgba(255,92,92,.3)}
+.endpoint-path{font-family:var(--mono);font-size:13px;color:var(--text);flex:1}
+.endpoint-path .param{color:var(--warn)}
+.endpoint-desc{font-size:12px;color:var(--muted);margin-left:auto;text-align:right;max-width:240px}
+.chevron{color:var(--muted);font-size:12px;transition:transform .2s;margin-left:8px}
+.endpoint.open .chevron{transform:rotate(180deg)}
+.lock-icon{color:var(--warn);font-size:12px;flex-shrink:0}
+.endpoint-body{display:none;border-top:1px solid var(--border);background:var(--bg);padding:20px 22px}
+.endpoint.open .endpoint-body{display:block}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:8px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.params-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.params-table th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.params-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.params-table tr:last-child td{border-bottom:none}
+.param-name{font-family:var(--mono);color:var(--accent2)}
+.param-type{color:var(--accent)}
+.required-badge{font-size:9px;background:rgba(255,92,92,.2);color:var(--del);padding:1px 5px;border-radius:3px;font-weight:700;margin-left:4px}
+.optional-badge{font-size:9px;background:rgba(123,130,166,.15);color:var(--muted);padding:1px 5px;border-radius:3px;font-weight:700;margin-left:4px}
+.code-block{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:var(--mono);font-size:12px;line-height:1.7;overflow-x:auto;white-space:pre;color:var(--text)}
+.copy-btn{position:absolute;top:10px;right:10px;background:var(--border);border:none;color:var(--muted);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s}
+.copy-btn:hover{background:var(--accent);color:#fff}
+.jk{color:#a9d1f7}.js{color:#c3e88d}.jn{color:#f78c6c}.jb{color:#ff5874}.jnu{color:var(--muted)}
+.note{background:rgba(108,99,255,.08);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;font-size:12px;color:var(--muted);margin-top:12px}
+.note strong{color:var(--text)}
+.soft-delete-note{background:rgba(255,92,92,.07);border:1px solid rgba(255,92,92,.2);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--muted);margin-top:10px}
+.soft-delete-note strong{color:var(--del)}
+.warn-note{background:rgba(245,166,35,.07);border-left:3px solid var(--warn);border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;font-size:12px;color:var(--muted);margin-top:10px}
+.warn-note strong{color:var(--warn)}
+.status-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.status-chip{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px}
+.s2xx{background:rgba(0,210,160,.15);color:var(--get)}
+.s4xx{background:rgba(245,166,35,.15);color:var(--warn)}
+.s5xx{background:rgba(255,92,92,.15);color:var(--del)}
+.playground{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:16px}
+.playground h4{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.pg-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.pg-label{font-size:11px;color:var(--muted);min-width:80px}
+.pg-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px 10px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;min-width:0}
+.pg-input:focus{border-color:var(--accent)}
+.pg-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;resize:vertical;min-height:100px}
+.pg-textarea:focus{border-color:var(--accent)}
+.send-btn{background:var(--accent);border:none;color:#fff;padding:8px 18px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.send-btn:hover{opacity:.85}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+.pg-response{margin-top:12px;display:none}
+.pg-response-header{display:flex;gap:10px;align-items:center;margin-bottom:8px;font-size:11px}
+.pg-status{font-family:var(--mono);font-weight:700;padding:2px 8px;border-radius:4px}
+.pg-time{color:var(--muted)}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-logo"><h2>⚡ API Gateway Docs</h2><p>Unified Reference v1.0.0</p></div>
+  <div class="search-wrap"><input class="search-input" placeholder="Search endpoints…" oninput="liveSearch(this)"/></div>
+  <div class="sidebar-section">Overview</div>
+  <a class="sidebar-item" href="#overview">📋 Introduction</a>
+  <a class="sidebar-item" href="#auth-overview">🔐 Authentication</a>
+  <a class="sidebar-item" href="#zone-routing">🗺️ Zone Routing</a>
+  <a class="sidebar-item" href="#errors">⚠️ Error Codes</a>
+  <div class="sidebar-section" data-service="auth">Customer Service <span class="svc-badge badge-auth">AUTH</span></div>
+  <a class="sidebar-item" href="#customers" data-service="auth">👤 Customers</a>
+  <a class="sidebar-item" href="#customer-addresses" data-service="auth">📍 Addresses</a>
+  <div class="sidebar-section" data-service="mail">Mail Service <span class="svc-badge badge-mail">MAIL</span></div>
+  <a class="sidebar-item" href="#mail-templates" data-service="mail">📝 Mail Templates</a>
+  <a class="sidebar-item" href="#mail-queues" data-service="mail">📤 Mail Queues</a>
+  <a class="sidebar-item" href="#mail-logs" data-service="mail">📋 Mail Logs</a>
+  <a class="sidebar-item" href="#otp" data-service="mail">🔑 OTP</a>
+  <a class="sidebar-item" href="#inventory-logs" data-service="mail">📦 Inventory Logs</a>
+  <div class="sidebar-section" data-service="zone">Zone Service <span class="svc-badge badge-zone">ZONE</span></div>
+  <a class="sidebar-item" href="#administrators" data-service="zone">🔒 Administrators</a>
+  <a class="sidebar-item" href="#operators" data-service="zone">🏢 Operators</a>
+  <a class="sidebar-item" href="#authorized-person" data-service="zone">👥 Authorized Person</a>
+  <a class="sidebar-item" href="#zones" data-service="zone">🗺️ Zones</a>
+  <a class="sidebar-item" href="#store-categories" data-service="zone">🏷️ Store Categories</a>
+  <a class="sidebar-item" href="#stores" data-service="zone">🏪 Stores</a>
+  <a class="sidebar-item" href="#store-users" data-service="zone">👨‍💼 Store Users</a>
+  <a class="sidebar-item" href="#product-categories" data-service="zone">📂 Product Categories</a>
+  <a class="sidebar-item" href="#products" data-service="zone">📦 Products</a>
+  <a class="sidebar-item" href="#product-variants" data-service="zone">🔀 Product Variants</a>
+  <a class="sidebar-item" href="#cart" data-service="zone">🛒 Cart</a>
+  <a class="sidebar-item" href="#wishlist" data-service="zone">❤️ Wishlist</a>
+  <a class="sidebar-item" href="#coupons" data-service="zone">🎟️ Coupons</a>
+  <a class="sidebar-item" href="#coupon-usages" data-service="zone">📊 Coupon Usages</a>
+  <a class="sidebar-item" href="#reviews" data-service="zone">⭐ Reviews</a>
+  <a class="sidebar-item" href="#orders" data-service="zone">📋 Orders</a>
+  <a class="sidebar-item" href="#payments" data-service="zone">💳 Payments</a>
+  <a class="sidebar-item" href="#refunds" data-service="zone">↩️ Refunds</a>
+  <a class="sidebar-item" href="#order-deliveries" data-service="zone">🚚 Order Deliveries</a>
+  <a class="sidebar-item" href="#order-status-histories" data-service="zone">📜 Status Histories</a>
+</nav>
+<main class="main">
+
+  <div class="page-header" id="overview">
+    <h1>API Gateway — Unified Documentation</h1>
+    <p>Single entry point for all microservices. JWT verification, rate limiting, and zone-based routing happen here — services receive pre-authenticated requests.</p>
+    <div class="meta-chips">
+      <div class="chip">Version <span>1.0.0</span></div>
+      <div class="chip">Base Path <span>/api/v1</span></div>
+      <div class="chip">Auth <span>Bearer JWT</span></div>
+      <div class="chip">IP Limit <span>100 req/min</span></div>
+      <div class="chip">User Limit <span>200 req/min</span></div>
+    </div>
+  </div>
+
+  <div class="base-url-bar">
+    <span class="label">Gateway URL</span>
+    <input class="base-url-input" value="http://localhost:5000" placeholder="http://your-gateway.com"/>
+  </div>
+
+  <div class="svc-bar">
+    <button class="svc-tab active" onclick="filterService(this,'all')">All Services</button>
+    <button class="svc-tab" onclick="filterService(this,'auth')">🟢 Customer Service</button>
+    <button class="svc-tab" onclick="filterService(this,'mail')">🟣 Mail Service</button>
+    <button class="svc-tab" onclick="filterService(this,'zone')">🟡 Zone Service</button>
+  </div>
+
+  <div class="auth-card" id="auth-overview">
+    <h3>🔐 Authentication</h3>
+    <p style="font-size:13px;color:var(--muted)">Gateway verifies JWT and injects user identity as headers. Services trust <code style="color:var(--accent2)">x-user-id</code> and <code style="color:var(--accent2)">x-user-role</code> — they never re-verify JWT.</p>
+    <div class="auth-code">Authorization: Bearer &lt;your_jwt_token&gt;</div>
+    <div class="note" style="margin-top:14px"><strong>Gateway headers forwarded internally:</strong> &nbsp;<code style="color:var(--accent2)">x-user-id</code> &nbsp;<code style="color:var(--accent2)">x-user-role</code> &nbsp;<code style="color:var(--accent2)">x-api-key</code></div>
+    <div class="note" style="margin-top:8px"><strong>🔓 Public routes (no JWT needed):</strong> GET /stores, GET /stores/:id, GET /stores/pin-code/:pin, POST /administrators, POST /authorize-person/login, POST /authorize-person/verify-otp, POST /otp/send, POST /otp/verify</div>
+  </div>
+
+  <div class="module" id="zone-routing">
+    <div class="module-header"><h2>🗺️ Zone-Based Routing</h2></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">All Zone Service routes need <code style="color:var(--warn)">pin_code</code> to select the correct instance:</p>
+    <table class="params-table">
+      <tr><th>Priority</th><th>Source</th><th>Example</th></tr>
+      <tr><td class="param-type">1</td><td class="param-name">Query param</td><td style="color:var(--muted)">?pin_code=700091</td></tr>
+      <tr><td class="param-type">2</td><td class="param-name">Request body</td><td style="color:var(--muted)">{"pin_code":"700091"}</td></tr>
+      <tr><td class="param-type">3</td><td class="param-name">Header</td><td style="color:var(--muted)">x-pin-code: 700091</td></tr>
+    </table>
+    <div class="warn-note"><strong>400 ZONE_NOT_FOUND</strong> — returned if pin_code is missing or not mapped to any registered zone instance.</div>
+  </div>
+
+  <div class="module" id="errors">
+    <div class="module-header"><h2>⚠️ Error Codes</h2></div>
+    <table class="params-table">
+      <tr><th>HTTP</th><th>Reason</th><th>Description</th></tr>
+      <tr><td class="param-type">400</td><td class="param-name">VALIDATION_ERROR</td><td style="color:var(--muted)">Body/query failed validation</td></tr>
+      <tr><td class="param-type">400</td><td class="param-name">ZONE_NOT_FOUND</td><td style="color:var(--muted)">pin_code missing or unmapped</td></tr>
+      <tr><td class="param-type">401</td><td class="param-name">UNAUTHORIZED</td><td style="color:var(--muted)">JWT token missing</td></tr>
+      <tr><td class="param-type">401</td><td class="param-name">TOKEN_EXPIRED</td><td style="color:var(--muted)">JWT has expired</td></tr>
+      <tr><td class="param-type">401</td><td class="param-name">TOKEN_INVALID</td><td style="color:var(--muted)">JWT signature invalid</td></tr>
+      <tr><td class="param-type">403</td><td class="param-name">FORBIDDEN</td><td style="color:var(--muted)">Valid token, insufficient role</td></tr>
+      <tr><td class="param-type">404</td><td class="param-name">NOT_FOUND</td><td style="color:var(--muted)">Route or resource not found</td></tr>
+      <tr><td class="param-type">409</td><td class="param-name">DUPLICATE_ENTRY</td><td style="color:var(--muted)">Unique constraint violated</td></tr>
+      <tr><td class="param-type">429</td><td class="param-name">RATE_LIMIT_EXCEEDED</td><td style="color:var(--muted)">Too many requests</td></tr>
+      <tr><td class="param-type">502</td><td class="param-name">BAD_GATEWAY</td><td style="color:var(--muted)">Upstream returned unexpected error</td></tr>
+      <tr><td class="param-type">503</td><td class="param-name">SERVICE_UNAVAILABLE</td><td style="color:var(--muted)">Upstream service unreachable</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════ CUSTOMER SERVICE ═══════════════════ -->
+  <div class="module" data-service="auth" id="customers">
+    <div class="module-header"><h2>👤 Customers</h2><span class="svc-tag tag-auth">Customer Service :5001</span></div>
+
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/customers/me</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get my profile</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="cs-me-r">Response</div><div class="tab" data-target="cs-me-t">Try It</div></div>
+        <div class="tab-content active" id="cs-me-r">
+          <div class="status-row"><span class="status-chip s2xx">200 OK</span><span class="status-chip s4xx">401 Unauthorized</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"data"</span>: { <span class="jk">"id"</span>: <span class="js">"uuid"</span>, <span class="jk">"name"</span>: <span class="js">"John Doe"</span>, <span class="jk">"email"</span>: <span class="js">"john@example.com"</span>, <span class="jk">"phone"</span>: <span class="js">"+91..."</span>, <span class="jk">"profile_image"</span>: <span class="jnu">null</span> } }</div>
+        </div>
+        <div class="tab-content" id="cs-me-t">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" value="http://localhost:5000"/></div>
+            <div class="pg-row"><span class="pg-label">JWT Token</span><input class="pg-input token-input" placeholder="eyJ..."/></div>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="GET" data-path="/api/v1/customers/me" data-auth="true">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/customers/me</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update my profile</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="cs-putme-b">Body</div><div class="tab" data-target="cs-putme-t">Try It</div></div>
+        <div class="tab-content active" id="cs-putme-b">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th></th></tr>
+          <tr><td class="param-name">name</td><td class="param-type">string</td><td><span class="optional-badge">optional</span></td></tr>
+          <tr><td class="param-name">phone</td><td class="param-type">string</td><td><span class="optional-badge">optional</span></td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"John Updated"</span>, <span class="jk">"phone"</span>: <span class="js">"+919876543210"</span> }</div>
+        </div>
+        <div class="tab-content" id="cs-putme-t">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" value="http://localhost:5000"/></div>
+            <div class="pg-row"><span class="pg-label">JWT Token</span><input class="pg-input token-input" placeholder="eyJ..."/></div>
+            <textarea class="pg-textarea">{"name": "John Updated"}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="PUT" data-path="/api/v1/customers/me" data-auth="true">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/customers/me/profile-image</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update profile image</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <table class="params-table"><tr><th>Field</th><th>Type</th><th></th></tr><tr><td class="param-name">profile_image</td><td class="param-type">string (URL)</td><td><span class="required-badge">required</span></td></tr></table>
+        <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"profile_image"</span>: <span class="js">"https://cdn.example.com/avatar.jpg"</span> }</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/customers</span><span class="endpoint-desc">Create customer</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="cs-post-b">Body</div><div class="tab" data-target="cs-post-r">Response</div><div class="tab" data-target="cs-post-t">Try It</div></div>
+        <div class="tab-content active" id="cs-post-b">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th></th></tr>
+          <tr><td class="param-name">name</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">email</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">password</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">phone</td><td class="param-type">string</td><td><span class="optional-badge">optional</span></td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"John Doe"</span>, <span class="jk">"email"</span>: <span class="js">"john@example.com"</span>, <span class="jk">"password"</span>: <span class="js">"Pass@123"</span>, <span class="jk">"phone"</span>: <span class="js">"+919876543210"</span> }</div>
+        </div>
+        <div class="tab-content" id="cs-post-r">
+          <div class="status-row"><span class="status-chip s2xx">201 Created</span><span class="status-chip s4xx">409 Email exists</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"message"</span>: <span class="js">"Customer created"</span>, <span class="jk">"data"</span>: { <span class="jk">"id"</span>: <span class="js">"uuid"</span>, <span class="jk">"name"</span>: <span class="js">"John Doe"</span>, <span class="jk">"email"</span>: <span class="js">"john@example.com"</span> } }</div>
+        </div>
+        <div class="tab-content" id="cs-post-t">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" value="http://localhost:5000"/></div>
+            <textarea class="pg-textarea">{"name":"John Doe","email":"john@example.com","password":"Pass@123","phone":"+919876543210"}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/customers" data-auth="false">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/customers</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all customers</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/customers/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Returns 404 if not found or soft-deleted.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/customers/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update customer</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Admin operation. Same body as POST minus password.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/customers/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Delete customer</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Returns 204 on success.</div></div></div>
+  </div>
+
+  <!-- Customer Addresses -->
+  <div class="module" data-service="auth" id="customer-addresses">
+    <div class="module-header"><h2>📍 Customer Addresses</h2><span class="svc-tag tag-auth">Customer Service :5001</span></div>
+    <div class="note" style="margin-bottom:16px"><strong>Base:</strong> /api/v1/customers/<span style="color:var(--warn)">:customerId</span>/addresses — all routes require JWT.</div>
+
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/customers/<span class="param">:customerId</span>/addresses</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create address</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="ca-post-b">Body</div><div class="tab" data-target="ca-post-t">Try It</div></div>
+        <div class="tab-content active" id="ca-post-b">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th></th></tr>
+          <tr><td class="param-name">line1</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">city</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">state</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">pin_code</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">line2</td><td class="param-type">string</td><td><span class="optional-badge">optional</span></td></tr>
+          <tr><td class="param-name">is_default</td><td class="param-type">boolean</td><td><span class="optional-badge">optional</span></td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"line1"</span>: <span class="js">"12 Park St"</span>, <span class="jk">"city"</span>: <span class="js">"Kolkata"</span>, <span class="jk">"state"</span>: <span class="js">"West Bengal"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span>, <span class="jk">"is_default"</span>: <span class="jb">true</span> }</div>
+        </div>
+        <div class="tab-content" id="ca-post-t">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" value="http://localhost:5000"/></div>
+            <div class="pg-row"><span class="pg-label">JWT Token</span><input class="pg-input token-input" placeholder="eyJ..."/></div>
+            <textarea class="pg-textarea">{"line1":"12 Park St","city":"Kolkata","state":"West Bengal","pin_code":"700091","is_default":true}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/customers/CUSTOMER_ID/addresses" data-auth="true">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/customers/<span class="param">:customerId</span>/addresses</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List addresses</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">All addresses for the customer, with is_default flag.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/customers/<span class="param">:customerId</span>/addresses/<span class="param">:addressId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get address</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/customers/<span class="param">:customerId</span>/addresses/<span class="param">:addressId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update address</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">All fields optional in update.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/customers/<span class="param">:customerId</span>/addresses/<span class="param">:addressId</span>/default</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Set as default</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">Clears is_default on all other addresses for this customer.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/customers/<span class="param">:customerId</span>/addresses/<span class="param">:addressId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Delete address</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+  <!-- ═══════════════════ MAIL SERVICE ═══════════════════ -->
+  <div class="module" data-service="mail" id="mail-templates">
+    <div class="module-header"><h2>📝 Mail Templates</h2><span class="svc-tag tag-mail">Mail Service :5002</span></div>
+
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/mail-templates</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create template</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="mt-post-b">Body</div><div class="tab" data-target="mt-post-r">Response</div><div class="tab" data-target="mt-post-t">Try It</div></div>
+        <div class="tab-content active" id="mt-post-b">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th></th></tr>
+          <tr><td class="param-name">name</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">subject</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">body</td><td class="param-type">string (HTML)</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">variables</td><td class="param-type">string[]</td><td><span class="optional-badge">optional</span></td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"order_confirmation"</span>, <span class="jk">"subject"</span>: <span class="js">"Order #{{order_id}} Confirmed"</span>, <span class="jk">"body"</span>: <span class="js">"&lt;p&gt;Hi {{name}}&lt;/p&gt;"</span>, <span class="jk">"variables"</span>: [<span class="js">"order_id"</span>, <span class="js">"name"</span>] }</div>
+        </div>
+        <div class="tab-content" id="mt-post-r">
+          <div class="status-row"><span class="status-chip s2xx">201 Created</span><span class="status-chip s4xx">400 Validation</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"data"</span>: { <span class="jk">"id"</span>: <span class="js">"uuid"</span>, <span class="jk">"name"</span>: <span class="js">"order_confirmation"</span>, <span class="jk">"is_active"</span>: <span class="jb">true</span> } }</div>
+        </div>
+        <div class="tab-content" id="mt-post-t">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" value="http://localhost:5000"/></div>
+            <div class="pg-row"><span class="pg-label">JWT Token</span><input class="pg-input token-input" placeholder="eyJ..."/></div>
+            <textarea class="pg-textarea">{"name":"order_confirmation","subject":"Order Confirmed","body":"<p>Hi {{name}}</p>","variables":["name"]}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/mail-templates" data-auth="true">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-templates</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List templates</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, is_active</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-templates/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get template</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/mail-templates/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update template</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">All fields optional in update.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/mail-templates/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Toggle active</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"is_active"</span>: <span class="jb">false</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/mail-templates/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Delete template</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+  <div class="module" data-service="mail" id="mail-queues">
+    <div class="module-header"><h2>📤 Mail Queues</h2><span class="svc-tag tag-mail">Mail Service :5002</span></div>
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/mail-queues</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Queue a mail</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="mq-post-b">Body</div><div class="tab" data-target="mq-post-r">Response</div><div class="tab" data-target="mq-post-t">Try It</div></div>
+        <div class="tab-content active" id="mq-post-b">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th></th></tr>
+          <tr><td class="param-name">template_id</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">to</td><td class="param-type">string (email)</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">variables</td><td class="param-type">object</td><td><span class="optional-badge">optional</span></td></tr>
+          <tr><td class="param-name">scheduled_at</td><td class="param-type">ISO datetime</td><td><span class="optional-badge">optional</span></td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"template_id"</span>: <span class="js">"uuid"</span>, <span class="jk">"to"</span>: <span class="js">"john@example.com"</span>, <span class="jk">"variables"</span>: { <span class="jk">"name"</span>: <span class="js">"John"</span>, <span class="jk">"order_id"</span>: <span class="js">"ORD-001"</span> } }</div>
+        </div>
+        <div class="tab-content" id="mq-post-r">
+          <div class="status-row"><span class="status-chip s2xx">201 Queued</span><span class="status-chip s4xx">400 Validation</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"data"</span>: { <span class="jk">"id"</span>: <span class="js">"uuid"</span>, <span class="jk">"status"</span>: <span class="js">"PENDING"</span>, <span class="jk">"to"</span>: <span class="js">"john@example.com"</span> } }</div>
+        </div>
+        <div class="tab-content" id="mq-post-t">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" value="http://localhost:5000"/></div>
+            <div class="pg-row"><span class="pg-label">JWT Token</span><input class="pg-input token-input" placeholder="eyJ..."/></div>
+            <textarea class="pg-textarea">{"template_id":"TEMPLATE_UUID","to":"john@example.com","variables":{"name":"John"}}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/mail-queues" data-auth="true">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/mail-queues/process</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Trigger queue processing</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">Manually triggers the processor to send all PENDING mails.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-queues</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List queue items</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, status (PENDING | SENT | FAILED)</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-queues/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get queue item</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/mail-queues/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update status</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"status"</span>: <span class="js">"FAILED"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/mail-queues/<span class="param">:id</span>/retry</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Retry failed mail</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">Resets status to PENDING and increments retry_count.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/mail-queues/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Delete queue item</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+  <div class="module" data-service="mail" id="mail-logs">
+    <div class="module-header"><h2>📋 Mail Logs</h2><span class="svc-tag tag-mail">Mail Service :5002</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-logs</span><span class="lock-icon">🔒</span><span class="endpoint-desc">All mail logs</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-logs/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get log by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-logs/queue/<span class="param">:queueId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Logs by queue item</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-logs/template/<span class="param">:templateId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Logs by template</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/mail-logs/status/<span class="param">:status</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Logs by status</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>:status values:</strong> <code>sent</code> · <code>failed</code> · <code>pending</code></div></div></div>
+  </div>
+
+  <div class="module" data-service="mail" id="otp">
+    <div class="module-header"><h2>🔑 OTP</h2><span class="svc-tag tag-mail">Mail Service :5002</span></div>
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/otp/send</span><span class="endpoint-desc">Send OTP (public)</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="otp-send-b">Body</div><div class="tab" data-target="otp-send-t">Try It</div></div>
+        <div class="tab-content active" id="otp-send-b">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th></th></tr>
+          <tr><td class="param-name">email</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">type</td><td class="param-type">string</td><td><span class="optional-badge">optional</span></td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"email"</span>: <span class="js">"user@example.com"</span> }</div>
+        </div>
+        <div class="tab-content" id="otp-send-t">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" value="http://localhost:5000"/></div>
+            <textarea class="pg-textarea">{"email":"user@example.com"}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/otp/send" data-auth="false">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/otp/verify</span><span class="endpoint-desc">Verify OTP (public)</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="otp-v-b">Body</div><div class="tab" data-target="otp-v-r">Response</div></div>
+        <div class="tab-content active" id="otp-v-b">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th></th></tr>
+          <tr><td class="param-name">email</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr>
+          <tr><td class="param-name">otp</td><td class="param-type">string</td><td><span class="required-badge">required</span></td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"email"</span>: <span class="js">"user@example.com"</span>, <span class="jk">"otp"</span>: <span class="js">"492817"</span> }</div>
+        </div>
+        <div class="tab-content" id="otp-v-r">
+          <div class="status-row"><span class="status-chip s2xx">200 Valid</span><span class="status-chip s4xx">400 Invalid/Expired</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"message"</span>: <span class="js">"OTP verified"</span> }</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="module" data-service="mail" id="inventory-logs">
+    <div class="module-header"><h2>📦 Inventory Logs</h2><span class="svc-tag tag-mail">Mail Service :5002</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/inventory-logs</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create log entry</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/inventory-logs</span><span class="lock-icon">🔒</span><span class="endpoint-desc">All logs</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/inventory-logs/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get log</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/inventory-logs/product/<span class="param">:productId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Logs by product</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/inventory-logs/variant/<span class="param">:variantId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Logs by variant</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+  <!-- ═══════════════════ ZONE SERVICE — injected verbatim from zone-server docs ═══════════════════ -->
+  <div class="warn-note" style="margin-bottom:28px" data-service="zone"><strong>⚠️ Zone Routing required:</strong> All routes below need <code>pin_code</code> in query / body / header to route to the correct zone instance.</div>
+  <div class="module" data-service="zone" id="administrators">
+    <div class="module-header"><h2>👤 Administrator</h2></div>
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/administrators</span><span class="endpoint-desc">Login — get JWT token</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs">
+          <div class="tab active" data-target="t-adm-body">Body</div>
+          <div class="tab" data-target="t-adm-resp">Response</div>
+          <div class="tab" data-target="t-adm-try">Try It</div>
+        </div>
+        <div class="tab-content active" id="t-adm-body">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th>Rules</th></tr><tr><td class="param-name">username<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">min 3 chars</td></tr><tr><td class="param-name">password<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">min 6 chars</td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"username"</span>: <span class="js">"admin_root"</span>, <span class="jk">"password"</span>: <span class="js">"SecurePass@123"</span> }</div>
+        </div>
+        <div class="tab-content" id="t-adm-resp">
+          <div class="status-row"><span class="status-chip s2xx">200 OK</span><span class="status-chip s4xx">401 Unauthorized</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{
+  <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"message"</span>: <span class="js">"Login successful"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"token"</span>: <span class="js">"eyJhbGci..."</span>,
+    <span class="jk">"administrator"</span>: { <span class="jk">"_id"</span>: <span class="js">"664a..."</span>, <span class="jk">"username"</span>: <span class="js">"admin_root"</span>, <span class="jk">"created_at"</span>: <span class="js">"2024-05-10T08:00:00.000Z"</span> }
+  }, <span class="jk">"meta"</span>: {}
+}</div>
+        </div>
+        <div class="tab-content" id="t-adm-try">
+          <div class="playground">
+            <h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" placeholder="https://your-project.vercel.app" /></div>
+            <div class="pg-row"><span class="pg-label">Body</span></div>
+            <textarea class="pg-textarea">{"username":"admin_root","password":"SecurePass@123"}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/administrators" data-auth="false">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPERATORS -->
+  <div class="module" data-service="zone" id="operators">
+    <div class="module-header"><h2>🏢 Operator</h2></div>
+    <div class="endpoint">
+      <div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/operators</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create operator</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body">
+        <div class="tabs"><div class="tab active" data-target="t-opc-body">Body</div><div class="tab" data-target="t-opc-resp">Response</div><div class="tab" data-target="t-opc-try">Try It</div></div>
+        <div class="tab-content active" id="t-opc-body">
+          <table class="params-table"><tr><th>Field</th><th>Type</th><th>Rules</th></tr><tr><td class="param-name">name<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">min 3</td></tr><tr><td class="param-name">email<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">valid email, unique</td></tr><tr><td class="param-name">phone_number<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">10–15 chars</td></tr><tr><td class="param-name">business_type<span class="required-badge">required</span></td><td class="param-type">string</td><td style="color:var(--muted)">min 2</td></tr><tr><td class="param-name">upi_id<span class="optional-badge">optional</span></td><td class="param-type">string</td><td style="color:var(--muted)">—</td></tr></table>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Rajesh Kumar"</span>, <span class="jk">"email"</span>: <span class="js">"rajesh@example.com"</span>, <span class="jk">"phone_number"</span>: <span class="js">"9876543210"</span>, <span class="jk">"business_type"</span>: <span class="js">"Retail"</span> }</div>
+        </div>
+        <div class="tab-content" id="t-opc-resp">
+          <div class="status-row"><span class="status-chip s2xx">201 Created</span><span class="status-chip s4xx">409 Conflict</span></div>
+          <div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"data"</span>: { <span class="jk">"_id"</span>: <span class="js">"663f..."</span>, <span class="jk">"name"</span>: <span class="js">"Rajesh Kumar"</span>, <span class="jk">"is_active"</span>: <span class="jb">true</span>, <span class="jk">"created_at"</span>: <span class="js">"2024-05-12T09:15:00.000Z"</span> } }</div>
+        </div>
+        <div class="tab-content" id="t-opc-try">
+          <div class="playground"><h4>🧪 Try It</h4>
+            <div class="pg-row"><span class="pg-label">Base URL</span><input class="pg-input base-url-input" placeholder="https://your-project.vercel.app" /></div>
+            <div class="pg-row"><span class="pg-label">Token</span><input class="pg-input token-input" placeholder="eyJ..." /></div>
+            <div class="pg-row"><span class="pg-label">Body</span></div>
+            <textarea class="pg-textarea">{"name":"Rajesh Kumar","email":"rajesh@example.com","phone_number":"9876543210","business_type":"Retail"}</textarea>
+            <div class="pg-row" style="margin-top:10px;justify-content:flex-end"><button class="send-btn" data-method="POST" data-path="/api/v1/operators" data-auth="true">Send Request ↗</button></div>
+            <div class="pg-response"><div class="pg-response-header"><span class="pg-status"></span><span class="pg-time"></span></div><div class="code-block"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/operators</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query params:</strong> page, limit, search (name/email), status (true/false)</div><div class="code-block" style="margin-top:12px"><button class="copy-btn">Copy</button>{ <span class="jk">"data"</span>: [{...}], <span class="jk">"meta"</span>: { <span class="jk">"page"</span>: <span class="jn">1</span>, <span class="jk">"total"</span>: <span class="jn">42</span>, <span class="jk">"total_pages"</span>: <span class="jn">5</span> } }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/operators/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Returns full operator. 404 if not found or soft-deleted.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/operators/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Toggle active</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"is_active"</span>: <span class="jb">false</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/operators/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Assign zone &amp; person</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"authorized_person_id"</span>: <span class="js">"664c..."</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/operators/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete:</strong> Sets is_deleted=true and deleted_at. Permanently purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- AUTHORIZED PERSON -->
+  <div class="module" data-service="zone" id="authorized-person">
+    <div class="module-header"><h2>👥 Authorized Person</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/authorize-person/login</span><span class="endpoint-desc">Request OTP via email</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"email"</span>: <span class="js">"priya@example.com"</span> }</div><div class="note"><strong>Dev:</strong> _dev_otp in response when MAIL_SERVICE_URL not set. Wire mail service for production.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/authorize-person/verify-otp</span><span class="endpoint-desc">Verify OTP → JWT</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"email"</span>: <span class="js">"priya@example.com"</span>, <span class="jk">"otp"</span>: <span class="js">"493821"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/authorized-person</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Priya Sharma"</span>, <span class="jk">"phone_number"</span>: <span class="js">"9123456780"</span>, <span class="jk">"email"</span>: <span class="js">"priya@example.com"</span>, <span class="jk">"operator_id"</span>: <span class="js">"663f..."</span>, <span class="jk">"role"</span>: <span class="js">"MANAGER"</span> }</div><div class="note"><strong>Roles:</strong> MANAGER | STAFF | SUPPORT | DELIVERY</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/authorized-person</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, operator_id, role</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/authorized-person/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Single authorized person.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/authorized-person/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"role"</span>: <span class="js">"STAFF"</span>, <span class="jk">"phone_number"</span>: <span class="js">"9123456799"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/authorized-person/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/authorized-person/operators/<span class="param">:operatorId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By operator</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Path:</strong> operatorId — MongoDB ObjectId of the operator</div></div></div>
+  </div>
+
+  <!-- ZONE -->
+  <div class="module" data-service="zone" id="zones">
+    <div class="module-header"><h2>🗺️ Zone</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/zones</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create zone</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"area"</span>: <span class="js">"South Kolkata"</span>, <span class="jk">"zone_name"</span>: <span class="js">"Zone-SK-01"</span>, <span class="jk">"latitude"</span>: <span class="jn">22.5355</span>, <span class="jk">"longitude"</span>: <span class="jn">88.3476</span>, <span class="jk">"operator_id"</span>: <span class="js">"663f..."</span>, <span class="jk">"zone"</span>: [{ <span class="jk">"post_office"</span>: <span class="js">"Jadavpur"</span>, <span class="jk">"pin_code"</span>: <span class="jn">700032</span> }] }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/zones</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, operator_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/zones/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Full zone with all pin code entries.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/zones/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_name"</span>: <span class="js">"Zone-SK-01-A"</span>, <span class="jk">"area"</span>: <span class="js">"Updated Area"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/zones/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/zones/add-pin-code</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Add pin code</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"post_office"</span>: <span class="js">"Garia"</span>, <span class="jk">"pin_code"</span>: <span class="jn">700084</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/zones/remove-pin-code</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Remove pin code</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"pin_code"</span>: <span class="jn">700032</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/zones/add-bulk-pin-code</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Add bulk pin codes</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"zone"</span>: [{ <span class="jk">"post_office"</span>: <span class="js">"Baruipur"</span>, <span class="jk">"pin_code"</span>: <span class="jn">700144</span> }] }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/zones/remove-bulk-pin-code</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Remove bulk pin codes</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"zone_id"</span>: <span class="js">"664b..."</span>, <span class="jk">"pin_codes"</span>: [<span class="jn">700032</span>, <span class="jn">700033</span>] }</div></div></div>
+  </div>
+
+  <!-- STORE CATEGORIES -->
+  <div class="module" data-service="zone" id="store-categories">
+    <div class="module-header"><h2>🏷️ Store Category</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/store-categories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Restaurant"</span> }</div><div class="note">Slug is auto-generated from name.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-categories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Single store category.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/store-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Food &amp; Beverages"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/store-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- STORES -->
+  <div class="module" data-service="zone" id="stores">
+    <div class="module-header"><h2>🏪 Store</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/stores</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create store</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Spice Garden"</span>, <span class="jk">"phone_number"</span>: <span class="js">"9000011112"</span>, <span class="jk">"pin_code"</span>: <span class="jn">700032</span>, <span class="jk">"latitude"</span>: <span class="jn">22.499</span>, <span class="jk">"longitude"</span>: <span class="jn">88.372</span>, <span class="jk">"address"</span>: <span class="js">"12 Lake Rd"</span>, <span class="jk">"category_id"</span>: <span class="js">"664d..."</span>, <span class="jk">"is_doordrop"</span>: <span class="jb">true</span>, <span class="jk">"working_hours"</span>: [{ <span class="jk">"day"</span>: <span class="js">"Monday"</span>, <span class="jk">"open_time"</span>: <span class="js">"09:00"</span>, <span class="jk">"close_time"</span>: <span class="js">"22:00"</span> }] }</div><div class="note"><strong>Status:</strong> ACTIVE | INACTIVE | BLOCKED (default ACTIVE). Slug auto-generated.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/stores</span><span class="endpoint-desc">List all (public)</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, status, category_id, pin_code</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/stores/<span class="param">:id</span></span><span class="endpoint-desc">Get by ID (public)</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Full store with working_hours array.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/stores/pin-code/<span class="param">:pin-code</span></span><span class="endpoint-desc">By pin code (public)</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">Returns all ACTIVE stores in that pin code. Example: /api/v1/stores/pin-code/700032</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/stores/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">All fields optional. Slug regenerated if name changes.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/stores/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update status</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"status"</span>: <span class="js">"BLOCKED"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/stores/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- STORE USERS -->
+  <div class="module" data-service="zone" id="store-users">
+    <div class="module-header"><h2>👨‍💼 Store User</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/store-users</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create &amp; assign</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"first_name"</span>: <span class="js">"Amit"</span>, <span class="jk">"phone"</span>: <span class="js">"9012345678"</span>, <span class="jk">"role"</span>: <span class="js">"STORE_MANAGER"</span>, <span class="jk">"username"</span>: <span class="js">"amit_sg"</span>, <span class="jk">"password"</span>: <span class="js">"Pass@123"</span>, <span class="jk">"store_id"</span>: <span class="js">"664e..."</span> }</div><div class="note"><strong>Roles:</strong> STORE_MANAGER | POS — password bcrypt-hashed, never returned</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-users</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search (name/email/username/phone), store_id, role, status</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Password never returned.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:storeId</span>/store-users</span><span class="lock-icon">🔒</span><span class="endpoint-desc">All users of a store</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Path:</strong> storeId — MongoDB ObjectId</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"first_name"</span>: <span class="js">"Amit"</span>, <span class="jk">"role"</span>: <span class="js">"POS"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Publish/unpublish</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"is_published"</span>: <span class="jb">false</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/store-users/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- PRODUCT CATEGORIES -->
+  <div class="module" data-service="zone" id="product-categories">
+    <div class="module-header"><h2>📂 Product Category</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/product-categories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Starters"</span>, <span class="jk">"store_id"</span>: <span class="js">"664e..."</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-categories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, store_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Single product category.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/product-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Appetizers"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/product-categories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="module" data-service="zone" id="products">
+    <div class="module-header"><h2>📦 Product</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/products</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create product</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"name"</span>: <span class="js">"Paneer Tikka"</span>, <span class="jk">"type"</span>: <span class="js">"SIMPLE"</span>, <span class="jk">"sku"</span>: <span class="js">"SG-STR-001"</span>, <span class="jk">"stock"</span>: <span class="jn">50</span>, <span class="jk">"store_id"</span>: <span class="js">"664e..."</span>, <span class="jk">"category_id"</span>: <span class="js">"665g..."</span>, <span class="jk">"regular_price"</span>: <span class="jn">280</span>, <span class="jk">"price"</span>: <span class="jn">250</span>, <span class="jk">"tax_class"</span>: <span class="js">"GST18"</span>, <span class="jk">"tax_status"</span>: <span class="js">"TAXABLE"</span> }</div><div class="note"><strong>type:</strong> SIMPLE | VARIANT &nbsp;·&nbsp; <strong>tax_class:</strong> STANDARD | GST12 | GST15 | GST18</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/products</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search (full-text), store_id, category_id, type, tax_status</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/products/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Full product including images and tags.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/products/stores/<span class="param">:storesId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By store</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, category_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/products/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">All fields optional. Use PATCH /stock for stock-only updates.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/products/<span class="param">:id</span>/stock</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update stock</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"stock"</span>: <span class="jn">75</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/products/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- PRODUCT VARIANTS -->
+  <div class="module" data-service="zone" id="product-variants">
+    <div class="module-header"><h2>🔀 Product Variant</h2></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/product-variants</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create variant</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"product_id"</span>: <span class="js">"666h..."</span>, <span class="jk">"variant_name"</span>: <span class="js">"500ml"</span>, <span class="jk">"sku"</span>: <span class="js">"SG-DRK-001-500"</span>, <span class="jk">"price"</span>: <span class="jn">80</span>, <span class="jk">"stock"</span>: <span class="jn">100</span> }</div><div class="note">Only VARIANT-type products should have variants. SKU must be globally unique.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-variants</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, search, product_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-variants/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get by ID</span><span class="chevron">▼</span></div><div class="endpoint-body"><p style="color:var(--muted);font-size:13px">Single product variant.</p></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/product-variants/products/<span class="param">:productsid</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By product</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">All variants for a parent product. Useful for product detail pages.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/product-variants/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"variant_name"</span>: <span class="js">"750ml"</span>, <span class="jk">"price"</span>: <span class="jn">110</span> }</div></div></div>
+
+  <!-- CART -->
+  <div class="module" data-service="zone" id="cart">
+    <div class="module-header"><h2>🛒 Cart</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/cart/customer/<span class="param">:customerId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Cart by customer</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">Returns all cart items for the customer. Empty array if none.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/cart</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Add item to cart</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"customer_id"</span>: <span class="js">"uuid"</span>, <span class="jk">"product_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"variant_id"</span>: <span class="jnu">null</span>, <span class="jk">"quantity"</span>: <span class="jn">2</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/cart</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all carts</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/cart/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Replace cart</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"items"</span>: [{ <span class="jk">"product_id"</span>: <span class="js">"..."</span>, <span class="jk">"quantity"</span>: <span class="jn">1</span> }] }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/cart/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update quantity</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"quantity"</span>: <span class="jn">3</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/cart/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Remove item</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+  <!-- WISHLIST -->
+  <div class="module" data-service="zone" id="wishlist">
+    <div class="module-header"><h2>❤️ Wishlist</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/wishlist/customer/<span class="param">:customerId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Wishlist by customer</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/wishlist</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Add to wishlist</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"customer_id"</span>: <span class="js">"uuid"</span>, <span class="jk">"product_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/wishlist</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/wishlist/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Replace items</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/wishlist/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Toggle item</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"product_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"action"</span>: <span class="js">"add"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/wishlist/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Remove item</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+  <!-- COUPONS -->
+  <div class="module" data-service="zone" id="coupons">
+    <div class="module-header"><h2>🎟️ Coupons</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/coupons/public</span><span class="endpoint-desc">Public coupons (no auth)</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note">Returns all active, non-expired, publicly visible coupons.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/coupons/code/<span class="param">:code</span></span><span class="endpoint-desc">Get by code (no auth)</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/coupons</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create coupon</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"code"</span>: <span class="js">"WELCOME20"</span>, <span class="jk">"discount_type"</span>: <span class="js">"PERCENT"</span>, <span class="jk">"discount_value"</span>: <span class="jn">20</span>, <span class="jk">"min_order_amount"</span>: <span class="jn">200</span>, <span class="jk">"max_uses"</span>: <span class="jn">500</span>, <span class="jk">"expires_at"</span>: <span class="js">"2025-12-31T23:59:59Z"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div><div class="note"><strong>discount_type:</strong> PERCENT | FLAT</div></div>
+    </div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/coupons</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, status, search</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/coupons/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get coupon</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/coupons/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update coupon</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/coupons/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update status</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"is_active"</span>: <span class="jb">false</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/coupons/<span class="param">:id</span>/validate</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Validate coupon</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"customer_id"</span>: <span class="js">"uuid"</span>, <span class="jk">"order_amount"</span>: <span class="jn">350</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/coupons/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- COUPON USAGES -->
+  <div class="module" data-service="zone" id="coupon-usages">
+    <div class="module-header"><h2>📊 Coupon Usages</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/coupon-usages/customers/<span class="param">:customerId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By customer</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/coupon-usages/usages/<span class="param">:couponId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By coupon</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/coupon-usages</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Record usage</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"coupon_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"customer_id"</span>: <span class="js">"uuid"</span>, <span class="jk">"order_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/coupon-usages</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/coupon-usages/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get usage</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="module" data-service="zone" id="reviews">
+    <div class="module-header"><h2>⭐ Reviews</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/reviews/customer/<span class="param">:customerId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By customer</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/reviews/products/<span class="param">:productId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By product</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/reviews/order/<span class="param">:orderId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By order</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/reviews</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create review</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"product_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"order_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"customer_id"</span>: <span class="js">"uuid"</span>, <span class="jk">"rating"</span>: <span class="jn">5</span>, <span class="jk">"comment"</span>: <span class="js">"Great product!"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/reviews</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List reviews</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, product_id, customer_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/reviews/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get review</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/reviews/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update review</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/reviews/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="module" data-service="zone" id="orders">
+    <div class="module-header"><h2>📋 Orders</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/orders</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create order</span><span class="chevron">▼</span></div>
+      <div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"customer_id"</span>: <span class="js">"uuid"</span>, <span class="jk">"store_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"items"</span>: [{ <span class="jk">"product_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"quantity"</span>: <span class="jn">2</span>, <span class="jk">"price"</span>: <span class="jn">250</span> }], <span class="jk">"address_id"</span>: <span class="js">"uuid"</span>, <span class="jk">"coupon_id"</span>: <span class="jnu">null</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div>
+    </div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List orders</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, status, customer_id, store_id</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders/by-number/<span class="param">:orderNo</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By order number</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders/customers/<span class="param">:customerId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By customer</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders/stores/<span class="param">:storeId</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By store</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get order</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span>/items</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Order items</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span>/payment</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Order payment</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span>/delivery</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Order delivery</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders/status-history/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Status history</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update order</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span>/cancel</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Cancel order</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"reason"</span>: <span class="js">"Customer requested"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span>/confirm</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Confirm order</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"note"</span>: <span class="js">"Confirmed by store"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span>/pack</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Mark packed</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span>/deliver</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Mark delivered</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/orders/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Soft delete</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="soft-delete-note"><strong>⚠️ Soft Delete.</strong> Purged after 3 days.</div></div></div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="module" data-service="zone" id="payments">
+    <div class="module-header"><h2>💳 Payments</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/payments/create</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Initiate payment</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"order_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"amount"</span>: <span class="jn">500</span>, <span class="jk">"payment_method"</span>: <span class="js">"RAZORPAY"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/payments/verify</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Verify payment</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"razorpay_order_id"</span>: <span class="js">"order_xxx"</span>, <span class="jk">"razorpay_payment_id"</span>: <span class="js">"pay_xxx"</span>, <span class="jk">"razorpay_signature"</span>: <span class="js">"sig_xxx"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/payments/failure</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Record failure</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/payments/webhook</span><span class="endpoint-desc">Payment webhook (public)</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>🔓 Public — no JWT.</strong> Called directly by payment provider. Signature verified internally.</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/payments</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List payments</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> page, limit, status, order_id</div></div></div>
+  </div>
+
+  <!-- REFUNDS -->
+  <div class="module" data-service="zone" id="refunds">
+    <div class="module-header"><h2>↩️ Refunds</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/refunds/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">By status</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="note"><strong>Query:</strong> status (PENDING | APPROVED | REJECTED)</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/refunds/orders/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By order</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/refunds/payments/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">By payment</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/refunds</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create refund</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"order_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"payment_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"amount"</span>: <span class="jn">250</span>, <span class="jk">"reason"</span>: <span class="js">"Damaged product"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/refunds</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List refunds</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/refunds/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get refund</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PATCH">PATCH</span><span class="endpoint-path">/api/v1/refunds/<span class="param">:id</span>/status</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update status</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"status"</span>: <span class="js">"APPROVED"</span>, <span class="jk">"note"</span>: <span class="js">"Refund approved"</span> }</div></div></div>
+  </div>
+
+  <!-- ORDER DELIVERIES -->
+  <div class="module" data-service="zone" id="order-deliveries">
+    <div class="module-header"><h2>🚚 Order Deliveries</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/order-deliveries</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create delivery</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"order_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"delivery_person"</span>: <span class="js">"Ravi Kumar"</span>, <span class="jk">"estimated_time"</span>: <span class="js">"2024-05-20T14:00:00Z"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/order-deliveries</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/order-deliveries/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get delivery</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-PUT">PUT</span><span class="endpoint-path">/api/v1/order-deliveries/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Update delivery</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-DELETE">DELETE</span><span class="endpoint-path">/api/v1/order-deliveries/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Remove</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+  <!-- ORDER STATUS HISTORIES -->
+  <div class="module" data-service="zone" id="order-status-histories">
+    <div class="module-header"><h2>📜 Order Status Histories</h2><span class="svc-tag tag-zone">Zone Service (pin_code routed)</span></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-POST">POST</span><span class="endpoint-path">/api/v1/orders-status-histories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">Create entry</span><span class="chevron">▼</span></div><div class="endpoint-body"><div class="code-block"><button class="copy-btn">Copy</button>{ <span class="jk">"order_id"</span>: <span class="js">"ObjectId"</span>, <span class="jk">"status"</span>: <span class="js">"PACKED"</span>, <span class="jk">"note"</span>: <span class="js">"Items packed"</span>, <span class="jk">"pin_code"</span>: <span class="js">"700091"</span> }</div></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders-status-histories</span><span class="lock-icon">🔒</span><span class="endpoint-desc">List all</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+    <div class="endpoint"><div class="endpoint-header"><span class="method method-GET">GET</span><span class="endpoint-path">/api/v1/orders-status-histories/<span class="param">:id</span></span><span class="lock-icon">🔒</span><span class="endpoint-desc">Get entry</span><span class="chevron">▼</span></div><div class="endpoint-body"></div></div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>
