@@ -20,6 +20,6 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
-reviewSchema.index({ product_id: 1, customer_id: 1 });
+reviewSchema.index({ product_id: 1 });
 
 module.exports = mongoose.model("Review", reviewSchema);
