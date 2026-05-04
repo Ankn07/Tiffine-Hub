@@ -1,7 +1,7 @@
 const { z } = require("zod");
 
 const createCouponDto = z.object({
-  code: z.string().min(3).toUpperCase(),
+  code: z.string().min(3,"Code must be at least 3 characters long").toUpperCase(),
   description: z.string().optional().default(""),
   type: z.enum(["PERCENTAGE", "FLAT"]),
   value: z.number().min(0),
@@ -18,7 +18,14 @@ const createCouponDto = z.object({
   path: ["valid_from"],
 });
 
-const updateCouponDto = createCouponDto.partial();
+const updateCouponDto = createCouponDto.partial().refine((d) => {
+  if (d.valid_from && d.valid_until) {
+    return new Date(d.valid_from) < new Date(d.valid_until);
+  }
+  return true; // If one of the dates is not provided, skip this validation
+}, {
+  message: "valid_from must be before valid_until",
+});
 
 const couponStatusDto = z.object({ is_active: z.boolean() });
 
