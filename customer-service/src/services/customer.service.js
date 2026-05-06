@@ -3,6 +3,7 @@
 const bcrypt = require('bcryptjs');
 const customerRepository = require('../repositories/customer.repository');
 const ApiError = require('../utils/api-error');
+const { login } = require('../controllers/customer.controller');
 
 const SALT_ROUNDS = 12;
 
@@ -73,6 +74,30 @@ const customerService = {
     await customerService.findById(userId);
     return customerRepository.update(userId, { profile_image_url });
   },
+  async changePassword(userId, currentPassword, newPassword) {
+    const customer = await customerService.findById(userId);
+
+    // Verify current password
+    const match = await bcrypt.compare(currentPassword, customer.password);
+    if (!match) throw ApiError.unauthorized('Current password is incorrect', 'INVALID_CURRENT_PASSWORD');
+    
+    // Hash new password and update
+    const hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await customerRepository.update(userId, { password: hashed });
+  },
+  async login(email, password) {
+    const customer = await customerRepository.findByEmail(email);
+    if (!customer) throw ApiError.unauthorized('Invalid email or password', 'INVALID_CREDENTIALS');
+    
+    const match = await bcrypt.compare(password, customer.password);
+    if (!match) throw ApiError.unauthorized('Invalid email or password', 'INVALID_CREDENTIALS');
+    
+    // Return without password
+    const { password: _, ...safe } = customer;
+    return safe;
+
+  }
+
 };
 
 module.exports = customerService;

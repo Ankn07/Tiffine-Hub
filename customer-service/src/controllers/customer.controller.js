@@ -6,6 +6,7 @@ const UpdateCustomerDto = require('../dto/customer/update-customer.dto');
 const UpdateCustomerProfileImageDto = require('../dto/customer/update-customer-profile-image.dto');
 const QueryCustomerDto = require('../dto/customer/query-customer.dto');
 const { sendSuccess, sendError, buildMeta, parsePagination } = require('../utils/api-response');
+const { signToken } = require('../utils/jwt');
 
 const customerController = {
   // POST /api/v1/customers
@@ -22,7 +23,22 @@ const customerController = {
     const data = await customerService.create(parsed.data);
     return sendSuccess(res, { statusCode: 201, message: 'Customer created successfully', data });
   },
-
+  // Login
+  async login(req, res) {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return sendError(res, {
+        statusCode: 400,
+        message: 'Email and password are required',
+        reason: 'VALIDATION_ERROR',
+        detail: 'Both email and password must be provided',
+      });
+    }
+    const data = await customerService.login(email, password);
+    const token = signToken({ id: data.id, email: data.email });
+    return sendSuccess(res, { message: 'Login successful', data: { ...data, token } });
+  }
+,
   // GET /api/v1/customers
   async findAll(req, res) {
     const parsed = QueryCustomerDto.safeParse(req.query);
