@@ -20,5 +20,6 @@ router.get('/', asyncHandler(customerController.findAll));
 router.get('/:id', asyncHandler(customerController.findById));
 router.put('/:id', asyncHandler(customerController.update));
 router.delete('/:id', asyncHandler(customerController.delete));
+router.post('/login', asyncHandler(customerController.login));
 
 module.exports = router;
