@@ -96,10 +96,6 @@ const ZONE_ROUTES_WITHOUT_AUTH = [
 
 ];
 ZONE_ROUTES_WITHOUT_AUTH.forEach((prefix) => {
-  app.use(prefix, proxyToZone);
-}
-);
-ZONE_ROUTES_WITHOUT_AUTH.forEach((prefix) => {
   app.use(prefix, userRateLimiter, proxyToZone);
 });
 
