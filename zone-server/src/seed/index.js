@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const env = require("../config/env");
 const Zone = require("../models/zone.model");
 const Administrator = require("../models/administrator.model");
-const { hashPassword } = require("../utils/authUtils");
+const { hashPassword } = require("../utils/jwt");
 
 async function seedDatabase(username, password) {
   try {

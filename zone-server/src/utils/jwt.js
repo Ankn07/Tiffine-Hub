@@ -8,5 +8,10 @@ const signToken = (payload) => {
 const verifyToken = (token) => {
   return jwt.verify(token, env.JWT_SECRET);
 };
+const hashPassword = async (password) => {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
+};
+
 
 module.exports = { signToken, verifyToken };
