@@ -61,7 +61,7 @@ const resolveZone = (req) => {
     return null;
   }
   console.log(`[ZoneRouter] Found zone for pin_code ${cleanPinCode}: ${url}`);
-
+  
   return {
     url,
     pinCode: cleanPinCode,

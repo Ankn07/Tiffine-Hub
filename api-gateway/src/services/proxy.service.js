@@ -121,9 +121,9 @@ const proxyToMail = (req, res) => forward(req, res, MAIL_SERVICE_URL);
  * Requires pin_code in query/body/header.
  */
 const proxyToZone = (req, res) => {
-  const zone = resolveZone(req);
-  console.log(`[Proxy] Resolved zone for ${req.originalUrl}:`, zone ? zone.name : 'NOT_FOUND');
-  if (!zone) {
+  const { url } = resolveZone(req);
+  console.log(`[Proxy] Resolved zone for ${req.originalUrl}:`, url ? url : 'NOT_FOUND');
+  if (!url) {
     return res.status(400).json({
       success: false,
       message: 'pin_code is required and must map to a known zone',
@@ -135,7 +135,7 @@ const proxyToZone = (req, res) => {
     });
   }
 
-  return forward(req, res, zone.url);
+  return forward(req, res, url);
 };
 
 module.exports = { proxyToAuth, proxyToMail, proxyToZone, forward };
