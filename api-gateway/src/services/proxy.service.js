@@ -54,7 +54,7 @@ const buildHeaders = (req) => {
  */
 const forward = async (req, res, targetBaseUrl) => {
   const url = `${targetBaseUrl}${req.originalUrl}`;
-
+  console.log(`[Proxy] Forwarding ${req.method} ${req.originalUrl} to ${url}`);
   try {
     const upstream = await client.request({
       method: req.method,
