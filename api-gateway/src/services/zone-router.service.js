@@ -1,36 +1,20 @@
 'use strict';
 
-/**
- * Zone Router Service
- *
- * Resolves the correct zone service URL for a request based on pin_code.
- * pin_code is read from (in priority order):
- *   1. req.query.pin_code
- *   2. req.body.pin_code
- *   3. req.headers['x-pin-code']
- *
- * ZONE_SERVICES env var must be a JSON object:
- *   {"700091": "http://zone-east-1:6001", "110001": "http://zone-north-1:6002"}
- */
-
 let _zoneMap = null;
 
 const getZoneMap = () => {
   if (_zoneMap) return _zoneMap;
+
   try {
     _zoneMap = JSON.parse(process.env.ZONE_SERVICES || '{}');
   } catch {
     console.error('[ZoneRouter] ZONE_SERVICES is not valid JSON');
     _zoneMap = {};
   }
+
   return _zoneMap;
 };
 
-/**
- * Extract pin_code from the request (query > body > header).
- * @param {import('express').Request} req
- * @returns {string|null}
- */
 const extractPinCode = (req) => {
   return (
     req.query.pin_code ||
@@ -40,29 +24,48 @@ const extractPinCode = (req) => {
   );
 };
 
-/**
- * Resolve the zone service base URL for the given request.
- * Returns null if no pin_code or no matching zone.
- *
- * @param {import('express').Request} req
- * @returns {{ url: string, pinCode: string } | null}
- */
 const resolveZone = (req) => {
   const pinCode = extractPinCode(req);
-  if (!pinCode) return null;
+
+  // For routes like /api/v1/demo-admin, /api/v1/zone-lookup
+  if (!pinCode) {
+    const defaultUrl = process.env.DEFAULT_ZONE_SERVICE_URL;
+
+    if (!defaultUrl) {
+      console.error('[ZoneRouter] No pin_code and DEFAULT_ZONE_SERVICE_URL missing');
+      return null;
+    }
+
+    return {
+      url: defaultUrl,
+      pinCode: null,
+      isDefault: true,
+    };
+  }
 
   const zoneMap = getZoneMap();
-  const url = zoneMap[String(pinCode).trim()];
-  if (!url) return null;
+  const cleanPinCode = String(pinCode).trim();
 
-  return { url, pinCode: String(pinCode).trim() };
+  const url = zoneMap[cleanPinCode];
+
+  if (!url) {
+    console.error(`[ZoneRouter] No zone found for pin_code: ${cleanPinCode}`);
+    return null;
+  }
+
+  return {
+    url,
+    pinCode: cleanPinCode,
+    isDefault: false,
+  };
 };
 
-/**
- * Get all registered zone entries (for debugging / admin).
- */
 const listZones = () => {
   return getZoneMap();
 };
 
-module.exports = { resolveZone, extractPinCode, listZones };
+module.exports = {
+  resolveZone,
+  extractPinCode,
+  listZones,
+};
