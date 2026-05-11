@@ -16,6 +16,10 @@ const getZoneMap = () => {
 };
 
 const extractPinCode = (req) => {
+  console.log(`[ZoneRouter] Extracting pin_code from ${req.originalUrl}`);
+  console.log(`[ZoneRouter] Query pin_code:`, req.query.pin_code);
+  console.log(`[ZoneRouter] Body pin_code:`, req.body ? req.body.pin_code : 'N/A');
+  console.log(`[ZoneRouter] Header x-pin-code:`, req.headers['x-pin-code']);
   return (
     req.query.pin_code ||
     (req.body && req.body.pin_code) ||
@@ -27,7 +31,8 @@ const extractPinCode = (req) => {
 const resolveZone = (req) => {
   const pinCode = extractPinCode(req);
 
-  // For routes like /api/v1/demo-admin, /api/v1/zone-lookup
+  // For routes like /api/v1/demo-admin, /api/v1/zone-lookup'
+  console.log(`[ZoneRouter] Resolving zone for pin_code: ${pinCode || 'NONE'}`);
   if (!pinCode) {
     const defaultUrl = process.env.DEFAULT_ZONE_SERVICE_URL;
 
