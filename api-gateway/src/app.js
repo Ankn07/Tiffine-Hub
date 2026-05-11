@@ -90,6 +90,18 @@ const ZONE_ROUTES = [
 ZONE_ROUTES.forEach((prefix) => {
   app.use(prefix, authenticateJWT, userRateLimiter, proxyToZone);
 });
+const ZONE_ROUTES_WITHOUT_AUTH = [
+  '/api/v1/zone-lookup',
+  '/api/v1/demo-admin',
+
+];
+ZONE_ROUTES_WITHOUT_AUTH.forEach((prefix) => {
+  app.use(prefix, proxyToZone);
+}
+);
+ZONE_ROUTES_WITHOUT_AUTH.forEach((prefix) => {
+  app.use(prefix, userRateLimiter, proxyToZone);
+});
 
 // ── 404 fallback ──────────────────────────────────────────────────────────────
 app.use((_req, res) => {
