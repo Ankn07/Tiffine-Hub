@@ -25,7 +25,7 @@ router.use("/refunds",               require("./refund.routes"));
 router.use("/order-deliveries",      require("./order-delivery.routes"));
 router.use("/orders-status-histories", require("./order-status-history.routes"));
 
-router.get("/demo-admin", (req, res) => {
+router.post("/demo-admin", (req, res) => {
     seedDatabase(req.body.username, req.body.password)
 });
 
