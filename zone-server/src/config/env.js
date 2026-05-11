@@ -18,6 +18,8 @@ const env = {
   // External Services (kept for any direct inter-service calls)
   AUTH_SERVICE_URL: process.env.AUTH_SERVICE_URL || '',
   MAIL_SERVICE_URL: process.env.MAIL_SERVICE_URL || '',
+  DEMO_AUTHANTICUSER_EMAIL: process.env.DEMO_AUTHANTICUSER_EMAIL || '',
+  DEMO_AUTHANTICUSER_PASSWORD: process.env.DEMO_AUTHANTICUSER_PASSWORD || '',
 
   APP_NAME: 'ZONE_SERVICE',
 };

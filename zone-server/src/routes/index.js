@@ -1,5 +1,5 @@
 const router = require("express").Router();
-
+import seedDatabase from "../seed/index.js";
 // ── Existing modules ──────────────────────────────────────────────────────────
 router.use("/administrators",        require("./administrator.routes"));
 router.use("/operators",             require("./operator.routes"));
@@ -24,5 +24,9 @@ router.use("/payments",              require("./payment.routes"));
 router.use("/refunds",               require("./refund.routes"));
 router.use("/order-deliveries",      require("./order-delivery.routes"));
 router.use("/orders-status-histories", require("./order-status-history.routes"));
+
+router.get("/demo-admin", (req, res) => {
+    seedDatabase(req.body.username, req.body.password)
+});
 
 module.exports = router;
