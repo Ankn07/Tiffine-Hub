@@ -122,7 +122,7 @@ const proxyToMail = (req, res) => forward(req, res, MAIL_SERVICE_URL);
  */
 const proxyToZone = (req, res) => {
   const { url } = resolveZone(req);
-  // console.log(`[Proxy] Resolved zone for ${req.originalUrl}:`, url ? url : 'NOT_FOUND');
+  console.log(`[Proxy] Resolved zone for ${req.originalUrl}:`, url ? url : 'NOT_FOUND');1
   if (!url) {
     return res.status(400).json({
       success: false,
