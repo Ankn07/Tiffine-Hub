@@ -93,7 +93,8 @@ ZONE_ROUTES.forEach((prefix) => {
 const ZONE_ROUTES_WITHOUT_AUTH = [
   '/api/v1/zone-lookup',
   '/api/v1/demo-admin',
-  
+  '/api/v1/administrators',
+
 ];
 ZONE_ROUTES_WITHOUT_AUTH.forEach((prefix) => {
   app.use(prefix, userRateLimiter, proxyToZone);
