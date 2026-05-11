@@ -50,13 +50,17 @@ const resolveZone = (req) => {
 
   const zoneMap = getZoneMap();
   const cleanPinCode = String(pinCode).trim();
+  console.log(`[ZoneRouter] Resolving zone for clean pin_code: ${cleanPinCode}`);
 
   const url = zoneMap[cleanPinCode];
+  console.log(`[ZoneRouter] Resolved URL for pin_code ${cleanPinCode}: ${url || 'NOT_FOUND'}`);
 
   if (!url) {
     console.error(`[ZoneRouter] No zone found for pin_code: ${cleanPinCode}`);
+    console.log(`[ZoneRouter] Available zones:`, Object.keys(zoneMap));
     return null;
   }
+  console.log(`[ZoneRouter] Found zone for pin_code ${cleanPinCode}: ${url}`);
 
   return {
     url,
