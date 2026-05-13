@@ -86,7 +86,14 @@ const ZONE_ROUTES = [
   '/api/v1/payments',
   '/api/v1/delivery',
   '/api/v1/store-categories',
-  '/api/v1/store-users'
+  '/api/v1/store-users',
+  '/api/v1/product-categories',
+  '/api/v1/product-variants',
+  '/api/v1/order-deliveries',
+  '/api/v1/orders-status-histories',
+  '/api/v1/coupons',
+  '/api/v1/coupon-usages',
+  '/api/v1/reviews'
 ];
 
 ZONE_ROUTES.forEach((prefix) => {
