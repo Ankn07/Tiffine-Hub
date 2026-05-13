@@ -85,6 +85,8 @@ const ZONE_ROUTES = [
   '/api/v1/orders',
   '/api/v1/payments',
   '/api/v1/delivery',
+  '/api/v1/store-categories',
+  '/api/v1/store-users'
 ];
 
 ZONE_ROUTES.forEach((prefix) => {
